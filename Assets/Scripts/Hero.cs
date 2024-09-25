@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 
-public class Hero : MonoBehaviour
+public class Hero : Entity
 {
     [SerializeField] private float speed = 3f;
     [SerializeField] private int lives = 5;
@@ -15,6 +15,8 @@ public class Hero : MonoBehaviour
     private SpriteRenderer sprite;
     private Animator anim;
 
+    public static Hero Instance { get; set; }
+
     private States State
     {
         get { return (States)anim.GetInteger("State"); }
@@ -22,6 +24,7 @@ public class Hero : MonoBehaviour
     }
     private void Awake()
     {
+        Instance = this;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponentInChildren<SpriteRenderer>();
@@ -57,6 +60,12 @@ public class Hero : MonoBehaviour
 
         if (!isGrounded && rb.velocity.y > 0f) State = States.Jump;
         else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
+    }
+
+    public override void GetDamage()
+    {
+        lives--;
+        Debug.Log(lives);
     }
 }
 
