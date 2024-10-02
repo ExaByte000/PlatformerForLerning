@@ -7,13 +7,22 @@ using UnityEngine.Animations;
 public class Hero : Entity
 {
     [SerializeField] private float speed = 3f;
-    [SerializeField] private int lives = 5;
     [SerializeField] private float jumpForce = 13f;
+
+    public Transform attackPos;
+    public float attackRange;
+    public LayerMask enemy;
 
     private bool isGrounded = true;
     private Rigidbody2D rb;
     private SpriteRenderer sprite;
     private Animator anim;
+
+    public bool isAttacking = false;
+    public bool isRecharged = true;
+    //private bool comboCheck = false;
+   // private bool comboAttack = false;
+    //private bool firsAttackFinihs = false;
 
     public static Hero Instance { get; set; }
 
@@ -22,22 +31,35 @@ public class Hero : Entity
         get { return (States)anim.GetInteger("State"); }
         set { anim.SetInteger("State", (int)value); }
     }
+
     private void Awake()
     {
         Instance = this;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponentInChildren<SpriteRenderer>();
+        isRecharged = true;
     }
+    private void Start()
+    {
+        lives = 5;
+    }
+
     private void FixedUpdate()
     {
         CheckGroug();
     }
+
     private void Update()
     {
         if (isGrounded) State = States.Idle;
+        if (isAttacking) State = States.Attack;  
+        
+
         if (Input.GetButton("Horizontal")) Run();
         if (isGrounded && Input.GetButtonDown("Jump")) Jump();
+        if (Input.GetButtonDown("Fire1")) Attack();
+        
     }
 
     private void Jump()
@@ -53,6 +75,7 @@ public class Hero : Entity
         transform.position = Vector3.MoveTowards(transform.position, transform.position + dir, speed * Time.deltaTime);
         sprite.flipX = dir.x < 0f;
     }
+
      private void CheckGroug()
     {
         Collider2D[] collider = Physics2D.OverlapCircleAll(transform.position, 0.3f);
@@ -62,10 +85,47 @@ public class Hero : Entity
         else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
     }
 
-    public override void GetDamage()
+
+    private void Attack()
     {
-        lives--;
-        Debug.Log(lives);
+        if (isGrounded && isRecharged)
+        {
+            isAttacking = true;
+            isRecharged = false;
+            StartCoroutine(AttackAnimation());
+            StartCoroutine(AttackCoolDown());
+        }
+        
+    }
+    
+
+    public void OnAttack()
+    {
+        
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackPos.position, attackRange, enemy);
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i].GetComponent<Entity>().GetDamage();
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPos.position, attackRange);
+    }
+
+    private IEnumerator AttackAnimation()
+    {
+        yield return new WaitForSeconds(1f);
+
+        isAttacking = false;
+    }
+    private IEnumerator AttackCoolDown()
+    {
+        yield return new WaitForSeconds(1.1f);
+        isRecharged = true;
     }
 }
 
@@ -74,5 +134,7 @@ public enum States
     Idle,
     Run,
     Jump,
-    Fall
+    Fall,
+    Attack,
+    ComboAttack
 }

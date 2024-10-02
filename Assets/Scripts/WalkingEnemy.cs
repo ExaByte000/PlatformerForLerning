@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class WalkingEnemy : Entity
 {
-    private float speed = 3.5f;
+   // private float speed = 3.5f;
     private Vector3 dir;
     private SpriteRenderer sprite;
 
@@ -16,7 +16,8 @@ public class WalkingEnemy : Entity
 
     private void Start()
     {
-        dir = transform.right;  
+        dir = transform.right;
+        lives = 3;
     }
 
     private void Update()

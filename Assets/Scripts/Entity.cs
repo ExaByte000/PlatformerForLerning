@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class Entity : MonoBehaviour
 {
-    public virtual void GetDamage()
+    protected int lives;
+    public void GetDamage()
     {
-
+        Debug.Log("Нанесен урон!");
+        lives--;
+        if (lives < 0) Die();
     }
 
     public virtual void Die()
