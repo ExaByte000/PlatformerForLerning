@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.UIElements;
 
 public class Hero : Entity
 {
@@ -59,7 +60,7 @@ public class Hero : Entity
         if (Input.GetButton("Horizontal")) Run();
         if (isGrounded && Input.GetButtonDown("Jump")) Jump();
         if (Input.GetButtonDown("Fire1")) Attack();
-        
+      
     }
 
     private void Jump()
@@ -74,13 +75,20 @@ public class Hero : Entity
         Vector3 dir = transform.right * Input.GetAxis("Horizontal");
         transform.position = Vector3.MoveTowards(transform.position, transform.position + dir, speed * Time.deltaTime);
         sprite.flipX = dir.x < 0f;
+        if (dir.x < 0f) attackPos.localPosition = new(-1.22f, attackPos.localPosition.y);
+        else attackPos.localPosition = new(1.22f, attackPos.localPosition.y);
+        
     }
 
      private void CheckGroug()
     {
         Collider2D[] collider = Physics2D.OverlapCircleAll(transform.position, 0.3f);
         isGrounded = collider.Length > 1;
-
+        if (transform.position.y < -30f)
+        {
+            transform.position = new(-6.88f, -3.24f);
+            lives--;
+        }
         if (!isGrounded && rb.velocity.y > 0f) State = States.Jump;
         else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
     }
@@ -88,7 +96,7 @@ public class Hero : Entity
 
     private void Attack()
     {
-        if (isGrounded && isRecharged)
+        if (isRecharged)
         {
             isAttacking = true;
             isRecharged = false;
