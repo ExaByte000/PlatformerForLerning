@@ -14,10 +14,11 @@ public class Hero : Entity
     public float attackRange;
     public LayerMask enemy;
 
-    private bool isGrounded = true;
+    [SerializeField] private bool isGrounded = true;
     private Rigidbody2D rb;
     private SpriteRenderer sprite;
     private Animator anim;
+    private BoxCollider2D boxCollider;
 
     public bool isAttacking = false;
     public bool isRecharged = true;
@@ -39,6 +40,7 @@ public class Hero : Entity
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponentInChildren<SpriteRenderer>();
+        boxCollider = GetComponent<BoxCollider2D>();
         isRecharged = true;
     }
     private void Start()
@@ -53,14 +55,15 @@ public class Hero : Entity
 
     private void Update()
     {
-        if (isGrounded) State = States.Idle;
-        if (isAttacking) State = States.Attack;  
+        // if (isGrounded) State = States.Idle;
+        // if (isAttacking) State = States.Attack;
+        //Debug.Log(rb.velocity.y);
         
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) Run();
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space)) Jump();
+        if (Input.GetKeyDown(KeyCode.Mouse0)) Attack();
+        AllAnims();
 
-        if (Input.GetButton("Horizontal")) Run();
-        if (isGrounded && Input.GetButtonDown("Jump")) Jump();
-        if (Input.GetButtonDown("Fire1")) Attack();
-      
     }
 
     private void Jump()
@@ -71,7 +74,7 @@ public class Hero : Entity
 
     private void Run()
     {
-        if (isGrounded) State = States.Run;
+        
         Vector3 dir = transform.right * Input.GetAxis("Horizontal");
         transform.position = Vector3.MoveTowards(transform.position, transform.position + dir, speed * Time.deltaTime);
         sprite.flipX = dir.x < 0f;
@@ -82,15 +85,14 @@ public class Hero : Entity
 
      private void CheckGroug()
     {
-        Collider2D[] collider = Physics2D.OverlapCircleAll(transform.position, 0.3f);
+        Collider2D[] collider = Physics2D.OverlapBoxAll(transform.position, new(boxCollider.size.x, 0.2f), 0f);
         isGrounded = collider.Length > 1;
         if (transform.position.y < -30f)
         {
             transform.position = new(-6.88f, -3.24f);
             lives--;
         }
-        if (!isGrounded && rb.velocity.y > 0f) State = States.Jump;
-        else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
+        
     }
 
 
@@ -122,18 +124,30 @@ public class Hero : Entity
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPos.position, attackRange);
+       
     }
 
     private IEnumerator AttackAnimation()
     {
         yield return new WaitForSeconds(1f);
-
         isAttacking = false;
     }
     private IEnumerator AttackCoolDown()
     {
         yield return new WaitForSeconds(1.1f);
         isRecharged = true;
+    }
+
+    private void AllAnims()
+    {
+        anim.SetBool("isGrounded", isGrounded);
+        if (isGrounded) anim.SetFloat("MovmentSpeedX", Math.Abs(Input.GetAxis("Horizontal")));
+        anim.SetBool("isAttack", isAttacking);
+        if (!isGrounded)
+        {
+            anim.SetFloat("MovmentSpeedY", rb.velocity.y);
+        }
+        //else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
     }
 }
 
