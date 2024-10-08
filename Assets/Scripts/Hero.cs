@@ -84,7 +84,7 @@ public class Hero : Entity
     }
 
      private void CheckGroug()
-    {
+     {
         Collider2D[] collider = Physics2D.OverlapBoxAll(transform.position, new(boxCollider.size.x, 0.2f), 0f);
         isGrounded = collider.Length > 1;
         if (transform.position.y < -30f)
@@ -93,7 +93,7 @@ public class Hero : Entity
             lives--;
         }
         
-    }
+     }
 
 
     private void Attack()
@@ -102,7 +102,7 @@ public class Hero : Entity
         {
             isAttacking = true;
             isRecharged = false;
-            StartCoroutine(AttackAnimation());
+            StartCoroutine("AttackAnimation");
             StartCoroutine(AttackCoolDown());
         }
         
@@ -142,6 +142,11 @@ public class Hero : Entity
     {
         anim.SetBool("isGrounded", isGrounded);
         if (isGrounded) anim.SetFloat("MovmentSpeedX", Math.Abs(Input.GetAxis("Horizontal")));
+        if (Input.GetAxis("Horizontal") != 0)
+        {
+            isAttacking = false;
+            StopCoroutine("AttackAnimation");
+        }
         anim.SetBool("isAttack", isAttacking);
         if (!isGrounded)
         {
