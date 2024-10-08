@@ -22,9 +22,7 @@ public class Hero : Entity
 
     public bool isAttacking = false;
     public bool isRecharged = true;
-    //private bool comboCheck = false;
-   // private bool comboAttack = false;
-    //private bool firsAttackFinihs = false;
+    
 
     public static Hero Instance { get; set; }
 
@@ -55,10 +53,6 @@ public class Hero : Entity
 
     private void Update()
     {
-        // if (isGrounded) State = States.Idle;
-        // if (isAttacking) State = States.Attack;
-        //Debug.Log(rb.velocity.y);
-        
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) Run();
         if (isGrounded && Input.GetKeyDown(KeyCode.Space)) Jump();
         if (Input.GetKeyDown(KeyCode.Mouse0)) Attack();
@@ -102,7 +96,7 @@ public class Hero : Entity
         {
             isAttacking = true;
             isRecharged = false;
-            StartCoroutine("AttackAnimation");
+            StartCoroutine(AttackAnimation());
             StartCoroutine(AttackCoolDown());
         }
         
@@ -142,17 +136,8 @@ public class Hero : Entity
     {
         anim.SetBool("isGrounded", isGrounded);
         if (isGrounded) anim.SetFloat("MovmentSpeedX", Math.Abs(Input.GetAxis("Horizontal")));
-        if (Input.GetAxis("Horizontal") != 0)
-        {
-            isAttacking = false;
-            StopCoroutine("AttackAnimation");
-        }
         anim.SetBool("isAttack", isAttacking);
-        if (!isGrounded)
-        {
-            anim.SetFloat("MovmentSpeedY", rb.velocity.y);
-        }
-        //else if (!isGrounded && rb.velocity.y < 0f) State = States.Fall;
+        if (!isGrounded) anim.SetFloat("MovmentSpeedY", rb.velocity.y);
     }
 }
 
