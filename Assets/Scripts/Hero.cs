@@ -137,7 +137,7 @@ public class Hero : Entity
         anim.SetBool("isGrounded", isGrounded);
         if (isGrounded) anim.SetFloat("MovmentSpeedX", Math.Abs(Input.GetAxis("Horizontal")));
         anim.SetBool("isAttack", isAttacking);
-        if (!isGrounded) anim.SetFloat("MovmentSpeedY", rb.velocity.y);
+        if (!isGrounded) anim.SetFloat("MovmentSpeedY", rb.linearVelocity.y);
     }
 }
 
